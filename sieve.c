@@ -1,17 +1,17 @@
 // Eratosthenes sieve using CSP
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <string.h>
-#include <errno.h>
 
 #define PIPE_READ  0
 #define PIPE_WRITE 1
 
-#define DEFAULT_STOP 100
+#define DEFAULT_RANGE 100
 
 #define ERROR_FORK                                                             \
     printf("%s:%d: fork() failed!: %s\n", __FILE__, __LINE__,                  \
@@ -41,13 +41,14 @@ int main(int argc, char* argv[]) {
 
     if (pipe(in_pipe) == -1) { ERROR_PIPE }
 
+    // We want the unfiltered data to be fed in through a separate process or
+    // the integer range will be limited by pipe's buffer size. Doing it this
+    // way gives us "unbounded" range. i.e., bounded only by the width of
+    // range's datatype.
     switch (fork()) {
         case -1: ERROR_FORK
 
         case 0:
-            // Initialize the pipe with the entire unfiltered data
-            // We want the initialization to be done on a separate process or
-            // the integer range will be limited by pipe's buffer size
             close(in_pipe[PIPE_READ]);
 
             for (long i = 2; i <= range; i++) {

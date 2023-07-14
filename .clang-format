@@ -1,0 +1,31 @@
+﻿BasedOnStyle: LLVM
+PointerAlignment: Left
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: 'true'
+AlignConsecutiveAssignments: 'true'
+AlignConsecutiveDeclarations: 'false'
+AlignEscapedNewlines: Right
+AlignTrailingComments: 'true'
+AllowShortBlocksOnASingleLine: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: 'true'
+AllowShortLoopsOnASingleLine: 'true'
+IndentCaseLabels: 'true'
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Custom
+BraceWrapping: {
+  AfterClass: 'false',
+  AfterControlStatement: 'false',
+  AfterEnum: 'false',
+  AfterFunction: 'false',
+  AfterNamespace: 'false',
+  AfterStruct: 'false',
+  AfterUnion: 'false',
+  BeforeCatch: 'false',
+  BeforeElse: 'false'
+}
+ColumnLimit: '80'
+IndentWidth: '4'
+Language: Cpp
+
