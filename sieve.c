@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 #define PIPE_READ  0
 #define PIPE_WRITE 1
@@ -12,13 +14,16 @@
 #define DEFAULT_STOP 100
 
 #define ERROR_FORK                                                             \
-    fprintf(stderr, "fork() failed!\n");                                       \
+    printf("%s:%d: fork() failed!: %s\n", __FILE__, __LINE__,                  \
+           strerror(errno));                                                   \
     return 2;
 #define ERROR_PIPE                                                             \
-    fprintf(stderr, "pipe() failed!\n");                                       \
+    printf("%s:%d: pipe() failed!: %s\n", __FILE__, __LINE__,                  \
+           strerror(errno));                                                   \
     return 3;
 #define ERROR_WRITE                                                            \
-    fprintf(stderr, "write() failed!\n");                                      \
+    printf("%s:%d: write() failed!: %s\n", __FILE__, __LINE__,                 \
+           strerror(errno));                                                   \
     return 4;
 
 int main(int argc, char* argv[]) {
