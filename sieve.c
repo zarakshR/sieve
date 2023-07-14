@@ -12,6 +12,16 @@
 
 #define DEFAULT_STOP 100
 
+#define ERROR_FORK                                                             \
+    fprintf(stderr, "fork() failed!\n");                                       \
+    return 2;
+#define ERROR_PIPE                                                             \
+    fprintf(stderr, "pipe() failed!\n");                                       \
+    return 3;
+#define ERROR_WRITE                                                            \
+    fprintf(stderr, "write() failed!\n");                                      \
+    return 4;
+
 int main(int argc, char* argv[]) {
     int buf, prime, range;
     int in_pipe[2], out_pipe[2];
@@ -22,15 +32,25 @@ int main(int argc, char* argv[]) {
         range = DEFAULT_STOP;
     }
 
-    // This is the maximum no of ints that can fit in a pipe
-    if(range > 16384) { fprintf(stderr, "Range too big!\n"); return 5; }
+    if (pipe(in_pipe) == -1) { ERROR_PIPE }
 
-    if(pipe(in_pipe) == -1) { fprintf(stderr, "pipe() failed!\n"); return 3; };
+    switch (fork()) {
+        case -1: ERROR_FORK
 
-    // Initialize the pipe with the entire unfiltered data
-    for(int i = 2; i <= range; i++) {
-        if(write(in_pipe[PIPE_WRITE], &i, sizeof(int)) == -1) { fprintf(stderr, "write() failed!\n"); return 4; };
-    }
+        case 0:
+            // Initialize the pipe with the entire unfiltered data
+            // We want the initialization to be done on a separate process or
+            // the integer range will be limited by pipe's buffer size
+            close(in_pipe[PIPE_READ]);
+
+            for (int i = 2; i <= range; i++) {
+                if (write(in_pipe[PIPE_WRITE], &i, sizeof(int)) == -1) {
+                    ERROR_WRITE
+                }
+            }
+
+            close(in_pipe[PIPE_WRITE]);
+            return 0;
 
     while(true) {
 
