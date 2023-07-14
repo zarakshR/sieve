@@ -1,13 +1,12 @@
 // Eratosthenes sieve using CSP
 
-#include <stdio.h>
-#include <fcntl.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define PIPE_READ 0
+#define PIPE_READ  0
 #define PIPE_WRITE 1
 
 #define DEFAULT_STOP 100
@@ -26,7 +25,7 @@ int main(int argc, char* argv[]) {
     int buf, prime, range;
     int in_pipe[2], out_pipe[2];
 
-    if(argc == 2) {
+    if (argc == 2) {
         range = strtod(argv[1], NULL);
     } else {
         range = DEFAULT_STOP;
@@ -58,8 +57,8 @@ int main(int argc, char* argv[]) {
     while (true) {
         close(in_pipe[PIPE_WRITE]);
 
-        if(read(in_pipe[PIPE_READ], &prime, sizeof(int)) == 0) { return 0; }
-        printf("PID: %d\tPGID:%d\tPrime: %d\n", getpid(), getpgid(0), prime);
+        if (read(in_pipe[PIPE_READ], &prime, sizeof(int)) == 0) { return 0; }
+        printf("PID: %d\tPrime: %d\n", getpid(), prime);
 
         // Create a new output pipe before each fork
         if (pipe(out_pipe) == -1) { ERROR_PIPE };
@@ -73,16 +72,18 @@ int main(int argc, char* argv[]) {
 
             case 0:
                 // Make out_pipe the new input pipe for when we fork again
-                in_pipe[PIPE_READ] = out_pipe[PIPE_READ];
+                in_pipe[PIPE_READ]  = out_pipe[PIPE_READ];
                 in_pipe[PIPE_WRITE] = out_pipe[PIPE_WRITE];
                 break;
+
             default:
                 close(in_pipe[PIPE_WRITE]);
                 close(out_pipe[PIPE_READ]);
 
-                while(read(in_pipe[PIPE_READ], &buf, sizeof(int))) {
-                    if(buf % prime != 0) {
-                        if(write(out_pipe[PIPE_WRITE], &buf, sizeof(int)) == -1) { fprintf(stderr, "write() failed!\n"); return 4; };
+                while (read(in_pipe[PIPE_READ], &buf, sizeof(int))) {
+                    if (buf % prime == 0) { continue; }
+                    if (write(out_pipe[PIPE_WRITE], &buf, sizeof(int)) == -1) {
+                        ERROR_WRITE
                     }
                 }
 
