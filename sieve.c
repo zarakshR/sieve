@@ -27,13 +27,16 @@
     return 4;
 
 int main(int argc, char* argv[]) {
-    int buf, prime, range;
+    long buf, prime, range;
     int in_pipe[2], out_pipe[2];
 
-    if (argc == 2) {
-        range = strtod(argv[1], NULL);
+    if (argc == 1) {
+        range = DEFAULT_RANGE;
+    } else if (argc == 2) {
+        range = strtol(argv[1], NULL, 10);
     } else {
-        range = DEFAULT_STOP;
+        fprintf(stderr, "Usage: %s <RANGE>\n", argv[0]);
+        return 1;
     }
 
     if (pipe(in_pipe) == -1) { ERROR_PIPE }
@@ -47,8 +50,8 @@ int main(int argc, char* argv[]) {
             // the integer range will be limited by pipe's buffer size
             close(in_pipe[PIPE_READ]);
 
-            for (int i = 2; i <= range; i++) {
-                if (write(in_pipe[PIPE_WRITE], &i, sizeof(int)) == -1) {
+            for (long i = 2; i <= range; i++) {
+                if (write(in_pipe[PIPE_WRITE], &i, sizeof(long)) == -1) {
                     ERROR_WRITE
                 }
             }
@@ -62,8 +65,8 @@ int main(int argc, char* argv[]) {
     while (true) {
         close(in_pipe[PIPE_WRITE]);
 
-        if (read(in_pipe[PIPE_READ], &prime, sizeof(int)) == 0) { return 0; }
-        printf("PID: %d\tPrime: %d\n", getpid(), prime);
+        if (read(in_pipe[PIPE_READ], &prime, sizeof(long)) == 0) { return 0; }
+        printf("PID: %d\tPrime: %ld\n", getpid(), prime);
 
         // Create a new output pipe before each fork
         if (pipe(out_pipe) == -1) { ERROR_PIPE };
@@ -85,9 +88,9 @@ int main(int argc, char* argv[]) {
                 close(in_pipe[PIPE_WRITE]);
                 close(out_pipe[PIPE_READ]);
 
-                while (read(in_pipe[PIPE_READ], &buf, sizeof(int))) {
+                while (read(in_pipe[PIPE_READ], &buf, sizeof(long))) {
                     if (buf % prime == 0) { continue; }
-                    if (write(out_pipe[PIPE_WRITE], &buf, sizeof(int)) == -1) {
+                    if (write(out_pipe[PIPE_WRITE], &buf, sizeof(long)) == -1) {
                         ERROR_WRITE
                     }
                 }
