@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
         close(in_pipe[PIPE_WRITE]);
 
         if (read(in_pipe[PIPE_READ], &prime, sizeof(long)) == 0) { return 0; }
-        printf("PID: %d\tPrime: %ld\n", getpid(), prime);
+        write(STDOUT_FILENO, &prime, sizeof(long));
 
         // Create a new output pipe before each fork
         if (pipe(out_pipe) == -1) { ERROR_PIPE };
