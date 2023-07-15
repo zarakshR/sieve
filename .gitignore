@@ -1,6 +1,5 @@
-perf*
-nums1k.txt
-nums1k.bin
+perf.data*
 primes1k.txt
+primes10k.txt
 decode
 sieve

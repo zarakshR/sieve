@@ -11,7 +11,7 @@
 #define PIPE_READ  0
 #define PIPE_WRITE 1
 
-#define TX_RX_BUF_SIZE 100
+#define TX_RX_BUF_SIZE 10000
 
 #define DEFAULT_RANGE 100
 
@@ -35,6 +35,7 @@
 int main(int argc, char* argv[]) {
     unsigned long prime, range;
     int in_pipe[2], out_pipe[2];
+    int pid;
 
     if (argc == 1) {
         range = DEFAULT_RANGE;
@@ -80,9 +81,8 @@ int main(int argc, char* argv[]) {
 
         // Flush stdout before forking or bad libc buffering things will happen
         fflush(stdout);
-        int pid = fork();
 
-        switch (pid) {
+        switch (pid = fork()) {
             case -1: ERROR_FORK
 
             case 0:
