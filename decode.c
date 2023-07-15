@@ -8,7 +8,7 @@ int main(int argc, char* argv[], char* envp[]) {
     ssize_t rdstat;
     long buf;
 
-    if((fd = open("nums.bin", O_RDONLY)) == -1) {
+    if((fd = open("nums1k.bin", O_RDONLY)) == -1) {
         return 1;
     }
 
