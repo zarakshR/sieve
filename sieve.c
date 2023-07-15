@@ -14,16 +14,16 @@
 #define DEFAULT_RANGE 100
 
 #define ERROR_FORK                                                             \
-    printf("%s:%d: fork() failed!: %s\n", __FILE__, __LINE__,                  \
-           strerror(errno));                                                   \
+    fprintf(stderr, "%s:%d: fork() failed!: %s\n", __FILE__, __LINE__,         \
+            strerror(errno));                                                  \
     return 2;
 #define ERROR_PIPE                                                             \
-    printf("%s:%d: pipe() failed!: %s\n", __FILE__, __LINE__,                  \
-           strerror(errno));                                                   \
+    fprintf(stderr, "%s:%d: pipe() failed!: %s\n", __FILE__, __LINE__,         \
+            strerror(errno));                                                  \
     return 3;
 #define ERROR_WRITE                                                            \
-    printf("%s:%d: write() failed!: %s\n", __FILE__, __LINE__,                 \
-           strerror(errno));                                                   \
+    fprintf(stderr, "%s:%d: write() failed!: %s\n", __FILE__, __LINE__,        \
+            strerror(errno));                                                  \
     return 4;
 
 int main(int argc, char* argv[]) {
