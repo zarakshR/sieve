@@ -3,7 +3,7 @@
 set -eux
 set -o pipefail
 
-make
+if ! make; then exit 1; else :; fi
 
-./sieve 1000 | ./decode > nums1k.txt
-if $(diff nums1k.txt primes1k.txt); then echo "OK!"; else echo "FAIL!"; fi
+diff -sq <(./sieve 1000 | ./decode) primes1k.txt
+diff -sq <(./sieve 10000 | ./decode) primes10k.txt
