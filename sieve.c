@@ -89,13 +89,22 @@ int main(int argc, char* argv[]) {
                 close(in_pipe[PIPE_WRITE]);
                 close(out_pipe[PIPE_READ]);
 
+                long* buffer = malloc(100 * sizeof(long));
+                size_t i     = 0;
+
                 while (read(in_pipe[PIPE_READ], &buf, sizeof(long))) {
                     if (buf % prime == 0) { continue; }
-                    if (write(out_pipe[PIPE_WRITE], &buf, sizeof(long)) == -1) {
-                        ERROR_WRITE
+                    buffer[i] = buf;
+                    i++;
+                    if (i == 100) {
+                        write(out_pipe[PIPE_WRITE], buffer, sizeof(long) * 100);
+                        i = 0;
                     }
                 }
 
+                write(out_pipe[PIPE_WRITE], buffer, sizeof(long) * i);
+
+                free(buffer);
                 close(in_pipe[PIPE_READ]);
                 close(out_pipe[PIPE_WRITE]);
 
