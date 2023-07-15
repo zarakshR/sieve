@@ -11,6 +11,8 @@
 #define PIPE_READ  0
 #define PIPE_WRITE 1
 
+#define TX_RX_BUF_SIZE 100
+
 #define DEFAULT_RANGE 100
 
 #define ERROR_FORK                                                             \
@@ -25,9 +27,13 @@
     fprintf(stderr, "%s:%d: write() failed!: %s\n", __FILE__, __LINE__,        \
             strerror(errno));                                                  \
     return 4;
+#define ERROR_READ                                                             \
+    fprintf(stderr, "%s:%d: read() failed!: %s\n", __FILE__, __LINE__,         \
+            strerror(errno));                                                  \
+    return 5;
 
 int main(int argc, char* argv[]) {
-    unsigned long buf, prime, range;
+    unsigned long prime, range;
     int in_pipe[2], out_pipe[2];
 
     if (argc == 1) {
@@ -67,7 +73,7 @@ int main(int argc, char* argv[]) {
         close(in_pipe[PIPE_WRITE]);
 
         if (read(in_pipe[PIPE_READ], &prime, sizeof(long)) == 0) { return 0; }
-        write(STDOUT_FILENO, &prime, sizeof(long));
+        if (write(STDOUT_FILENO, &prime, sizeof(long)) == -1) { ERROR_WRITE }
 
         // Create a new output pipe before each fork
         if (pipe(out_pipe) == -1) { ERROR_PIPE };
@@ -89,22 +95,42 @@ int main(int argc, char* argv[]) {
                 close(in_pipe[PIPE_WRITE]);
                 close(out_pipe[PIPE_READ]);
 
-                long* buffer = malloc(100 * sizeof(long));
-                size_t i     = 0;
+                long* rx_buffer = malloc(sizeof(long) * TX_RX_BUF_SIZE);
+                long* tx_buffer = malloc(sizeof(long) * TX_RX_BUF_SIZE);
 
-                while (read(in_pipe[PIPE_READ], &buf, sizeof(long))) {
-                    if (buf % prime == 0) { continue; }
-                    buffer[i] = buf;
-                    i++;
-                    if (i == 100) {
-                        write(out_pipe[PIPE_WRITE], buffer, sizeof(long) * 100);
-                        i = 0;
+                ssize_t nr = 0; // bytes read
+                ssize_t nw = 0; // bytes written
+
+                ssize_t total_nr = 0; // total bytes read
+                ssize_t total_nw = 0; // total bytes written
+
+                while (true) {
+
+                    ssize_t rxi = 0; // rxbuffer index
+                    ssize_t txi = 0; // txbuffer index
+
+                    nr = read(in_pipe[PIPE_READ], rx_buffer,
+                              sizeof(long) * TX_RX_BUF_SIZE);
+
+                    switch (nr) {
+                        case -1: ERROR_READ
+                        case 0: goto exit;
+                        default:
+                            for (; rxi < (nr / sizeof(long)); rxi++) {
+                                if (rx_buffer[rxi] % prime != 0) {
+                                    tx_buffer[txi] = rx_buffer[rxi];
+                                    txi++;
+                                }
+                            }
                     }
+                    nw = write(out_pipe[PIPE_WRITE], tx_buffer,
+                               sizeof(long) * txi);
                 }
 
-                write(out_pipe[PIPE_WRITE], buffer, sizeof(long) * i);
+            exit:
+                free(rx_buffer);
+                free(tx_buffer);
 
-                free(buffer);
                 close(in_pipe[PIPE_READ]);
                 close(out_pipe[PIPE_WRITE]);
 
