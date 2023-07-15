@@ -27,7 +27,7 @@
     return 4;
 
 int main(int argc, char* argv[]) {
-    long buf, prime, range;
+    unsigned long buf, prime, range;
     int in_pipe[2], out_pipe[2];
 
     if (argc == 1) {
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
         case 0:
             close(in_pipe[PIPE_READ]);
 
-            for (long i = 2; i <= range; i++) {
+            for (unsigned long i = 2; i <= range; i++) {
                 if (write(in_pipe[PIPE_WRITE], &i, sizeof(long)) == -1) {
                     ERROR_WRITE
                 }
