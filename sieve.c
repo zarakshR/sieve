@@ -99,10 +99,6 @@ int main(int argc, char* argv[]) {
                 long* tx_buffer = malloc(sizeof(long) * TX_RX_BUF_SIZE);
 
                 ssize_t nr = 0; // bytes read
-                ssize_t nw = 0; // bytes written
-
-                ssize_t total_nr = 0; // total bytes read
-                ssize_t total_nw = 0; // total bytes written
 
                 while (true) {
 
@@ -123,7 +119,8 @@ int main(int argc, char* argv[]) {
                                 }
                             }
                     }
-                    nw = write(out_pipe[PIPE_WRITE], tx_buffer,
+                    // TODO: Add error checking for write here
+                    write(out_pipe[PIPE_WRITE], tx_buffer,
                                sizeof(long) * txi);
                 }
 
