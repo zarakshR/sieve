@@ -98,33 +98,27 @@ int main(int argc, char* argv[]) {
                 long* rx_buffer = malloc(sizeof(long) * TX_RX_BUF_SIZE);
                 long* tx_buffer = malloc(sizeof(long) * TX_RX_BUF_SIZE);
 
+                ssize_t rxi = 0; // rxbuffer index
+                ssize_t txi = 0; // txbuffer index
+
                 ssize_t nr = 0; // bytes read
 
-                while (true) {
+                while (nr = read(in_pipe[PIPE_READ], rx_buffer,
+                                 sizeof(long) * TX_RX_BUF_SIZE)) {
 
-                    ssize_t rxi = 0; // rxbuffer index
-                    ssize_t txi = 0; // txbuffer index
+                    if (nr == -1) { ERROR_READ; }
 
-                    nr = read(in_pipe[PIPE_READ], rx_buffer,
-                              sizeof(long) * TX_RX_BUF_SIZE);
-
-                    switch (nr) {
-                        case -1: ERROR_READ
-                        case 0: goto exit;
-                        default:
-                            for (; rxi < (nr / sizeof(long)); rxi++) {
-                                if (rx_buffer[rxi] % prime != 0) {
-                                    tx_buffer[txi] = rx_buffer[rxi];
-                                    txi++;
-                                }
-                            }
+                    for (rxi = 0, txi = 0; rxi < (nr / sizeof(long)); rxi++) {
+                        if (rx_buffer[rxi] % prime != 0) {
+                            tx_buffer[txi] = rx_buffer[rxi];
+                            txi++;
+                        }
                     }
+
                     // TODO: Add error checking for write here
-                    write(out_pipe[PIPE_WRITE], tx_buffer,
-                               sizeof(long) * txi);
+                    write(out_pipe[PIPE_WRITE], tx_buffer, sizeof(long) * txi);
                 }
 
-            exit:
                 free(rx_buffer);
                 free(tx_buffer);
 
